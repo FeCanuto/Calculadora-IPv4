@@ -1,4 +1,3 @@
-# coding=utf-8
 import re
 from netaddr import IPNetwork
 
@@ -8,7 +7,6 @@ ipv4 = input(
 
 '''Listas Vazias'''
 decmask = []
-binmask = []
 ip_dec = []
 ip_hex = []
 ip_bin = []
@@ -20,28 +18,28 @@ CIDR = int(parts[1])  # Converter a máscara de string para inteiro
 stroct = parts[0].split(".")  # Usando split para criar uma lista de strings contendo os 4 octetos
 
 ip = IPNetwork(ipv4)
-binmask = ip.netmask.bits().split(("."))  # Conversão da máscara na notação cidr para binário
+binmask = ip.netmask.bits().split(".")  # Conversão da máscara na notação cidr para binário
 
 
 def convert_string_list(
-        stroct):  # Convertendo a lista de strings contendo os octetos em uma lista de int contendo os octetos
-    for i in stroct:
+        string_ip):  # Convertendo a lista de strings contendo os octetos em uma lista de int contendo os octetos
+    for i in string_ip:
         ip_dec.append(int(i))
 
 
-def format_binary(ip_dec):  # Formatando o binário para ter 8 digitos
-    for j in ip_dec:
+def format_binary(decimal):  # Formatando o binário para ter 8 digitos
+    for j in decimal:
         ip_bin.append(format(j, "08b"))
 
 
-def inttohex(ip_dec):
-    for i in ip_dec:
+def inttohex(decimal):
+    for i in decimal:
         ip_hex.append(hex(i))
 
 
-def broadcast_network_address(binmask):
-    for i in range(len(binmask)):
-        decmask.append(int(binmask[i], 2))
+def broadcast_network_address(mask):
+    for i in range(len(mask)):
+        decmask.append(int(mask[i], 2))
         ip_rede.append(decmask[i] & ip_dec[i])  # Operação de AND lógico para encontrar o endereço da rede
         broadcast.append(
             (~decmask[i] & 0xff) | ip_dec[i])  # Operação NOT na máscara seguida de um AND com o hexa de 255,
@@ -49,11 +47,11 @@ def broadcast_network_address(binmask):
 
 
 def amount_host(
-        binmask):  # Somando a quantidade de bits 0 na máscara, para indetificar a quantidade de hosts a posteriori
+        mask):  # Somando a quantidade de bits 0 na máscara, para indetificar a quantidade de hosts a posteriori
     amount = 0
-    for i in range(len(binmask)):
+    for i in range(len(mask)):
         for _ in range(1, 9):
-            result = int(binmask[i]) % 10
+            result = int(mask[i]) % 10
             if result == 0:
                 amount += 1
     return amount
