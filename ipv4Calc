@@ -1,9 +1,15 @@
-import re
+import argparse
 from netaddr import IPNetwork
 
-ipv4 = input(
-    "Digitar um IPv4 com máscara de rede na notação CIDR, Exemplo: 27.15.100.128 /17 \n>> ")  # ipv4 com máscara de
-# rede na notação CIDR exemplo: 27.15.100.128/17
+parser = argparse.ArgumentParser(
+    description="Calculadora IPv4 \n Desenvolvido por Felipe Canuto")
+# parser.parse_args
+parser.add_argument('--address', '-a', required=True,
+                    help="Endereço IPv4", default="127.0.0.1")
+parser.add_argument('--mask', '-m', required=True,
+                    help="Máscara de rede na notação CIDR")
+args = parser.parse_args()
+
 
 '''Listas Vazias'''
 decmask = []
@@ -13,12 +19,15 @@ ip_bin = []
 ip_rede = []
 broadcast = []
 
-parts = re.split("./", ipv4)  # utilização de uma expressão regular re.split para separar o IPv4 da máscara
-CIDR = int(parts[1])  # Converter a máscara de string para inteiro
-stroct = parts[0].split(".")  # Usando split para criar uma lista de strings contendo os 4 octetos
 
-ip = IPNetwork(ipv4)
-binmask = ip.netmask.bits().split(".")  # Conversão da máscara na notação cidr para binário
+CIDR = int(args.mask)  # Converter a máscara de string para inteiro
+# Usando split para criar uma lista de strings contendo os 4 octetos
+ip_oct = args.address.split(".")
+
+ip = IPNetwork(args.address + '/' + args.mask)
+# Conversão da máscara na notação cidr para binário
+binmask = ip.netmask.bits().split(".")
+
 
 
 def convert_string_list(
@@ -40,7 +49,8 @@ def inttohex(decimal):
 def broadcast_network_address(mask):
     for i in range(len(mask)):
         decmask.append(int(mask[i], 2))
-        ip_rede.append(decmask[i] & ip_dec[i])  # Operação de AND lógico para encontrar o endereço da rede
+        # Operação de AND lógico para encontrar o endereço da rede
+        ip_rede.append(decmask[i] & ip_dec[i])
         broadcast.append(
             (~decmask[i] & 0xff) | ip_dec[i])  # Operação NOT na máscara seguida de um AND com o hexa de 255,
         # o resutaldo dessa operação e um OR com o IP resulta no Broadcast
@@ -57,7 +67,7 @@ def amount_host(
     return amount
 
 
-convert_string_list(stroct)
+convert_string_list(ip_oct)
 format_binary(ip_dec)
 inttohex(ip_dec)
 broadcast_network_address(binmask)
@@ -74,9 +84,11 @@ print("IPv4 da rede:", ip_rede)
 print("IPv4 Broadcast:", broadcast)
 
 inicial = ip_rede
-inicial[3] = ip_rede[3] + 1  # O intervalo de hosts inicia um endereço após o endereço da rede
+# O intervalo de hosts inicia um endereço após o endereço da rede
+inicial[3] = ip_rede[3] + 1
 final = broadcast
-final[3] = broadcast[3] - 1  # O intervalo de hosts finaliza com um endereço antes do endereço broadcast
+# O intervalo de hosts finaliza com um endereço antes do endereço broadcast
+final[3] = broadcast[3] - 1
 
 print("Intervalo de endereços de host:", inicial, "-", final)
 print("Número de Hosts:", pow(2, hosts - 1))
